@@ -37,7 +37,7 @@ MODEL_LIST = [
     "iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
 ]
 
-PACKAGES = ["torch", "funasr", "modelscope", "imageio-ffmpeg", "yt-dlp"]
+PACKAGES = ["torch", "funasr", "modelscope", "imageio-ffmpeg", "yt-dlp", "websocket-client"]
 
 
 def venv_python() -> Path:
@@ -169,6 +169,10 @@ def write_config():
     cfg["bin_dir"] = str(BIN_DIR)
     # media_dir 是用户偏好（由 Agent 首次引导时询问后写入），这里只补默认，不覆盖已有值
     cfg.setdefault("media_dir", str(Path.home() / "视频转文字输出"))
+    # 以下为可选字段，仅在用户配置了对应能力时才写入（setup 不替用户决定）
+    #   proxy         境外站点代理（如 http://127.0.0.1:7890）
+    #   douyin_cookies  抖音 cookie 文件路径
+    #   lark_cli      lark-cli 可执行路径（飞书附件下载用）
     cfg_path.write_text(json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8")
     print("  已写入 %s" % cfg_path)
 

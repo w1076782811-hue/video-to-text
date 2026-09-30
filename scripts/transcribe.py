@@ -3,12 +3,12 @@
 r"""
 用 FunASR(SenseVoice) 把音频/视频转写成文字稿，stdout 输出纯文字。
 
-通用版：模型缓存目录从 <skill>/config.json 读取（可用环境变量覆盖），不含个人信息。
+可发布版：模型缓存目录从 <skill>/config.json 读取（环境变量可覆盖），不含个人信息。
 
 用法:
-  transcribe.py <媒体路径> [--timestamps]
+  transcribe.py <媒体路径> [--timestamps] [--raw-stdout]
 
-  · 不加 --timestamps：输出整段纯文本（一句话连成一段）
+  · 不加 --timestamps：输出整段纯文本
   · 加 --timestamps：每行 [mm:ss.xx - mm:ss.xx] 文本（按 VAD 自然切块）
   · stdout 是纯稿件；进度/日志走 stderr，下游不用手写过滤
 """
@@ -47,6 +47,8 @@ if MODEL_CACHE:
     # 而不是把本地目录直接塞给 model 参数（那样会报 model ... is not registered）。
     os.environ["MODELSCOPE_CACHE"] = MODEL_CACHE
     os.environ["MODELSCOPE_LOCAL_CACHE"] = MODEL_CACHE
+    os.environ["HF_HOME"] = MODEL_CACHE
+    os.environ["HUGGINGFACE_HUB_CACHE"] = MODEL_CACHE
 
 
 def _mute_stdout():
@@ -130,9 +132,10 @@ def _postprocess(text):
 def main():
     args = sys.argv[1:]
     use_ts = "--timestamps" in args
+    raw_stdout = "--raw-stdout" in args
     positional = [a for a in args if not a.startswith("--")]
     if len(positional) < 1:
-        print("用法: transcribe.py <媒体路径> [--timestamps]", file=sys.stderr)
+        print("用法: transcribe.py <媒体路径> [--timestamps] [--raw-stdout]", file=sys.stderr)
         sys.exit(1)
     src = positional[0]
     if not os.path.exists(src):
@@ -140,7 +143,8 @@ def main():
         sys.exit(1)
 
     wav = os.path.join(tempfile.gettempdir(), "vtt_%d.wav" % os.getpid())
-    saved = _mute_stdout()
+    saved = None if raw_stdout else _mute_stdout()
+    res = None
     try:
         print("[1/2] ffmpeg 抽取音轨: %s" % os.path.basename(src), file=sys.stderr)
         extract_audio(src, wav)
