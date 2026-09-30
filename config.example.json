@@ -4,5 +4,7 @@
   "python": "（由 setup.py 自动生成）venv 内 python 的绝对路径",
   "models_cache_dir": "（由 setup.py 自动生成）模型缓存根目录，默认 <skill>/runtime；其下 models/ 存 SenseVoice 与 fsmn-vad",
   "bin_dir": "（由 setup.py 自动生成）ffmpeg 所在目录，默认 <skill>/runtime/bin",
-  "proxy": "（可选，境外站点用）本地代理地址，例如 http://127.0.0.1:7897；留空则不使用"
+  "proxy": "（可选，境外站点用）本地代理地址，例如 http://127.0.0.1:7890；留空则不使用",
+  "douyin_cookies": "（可选）抖音 cookies.txt 路径，由 get_douyin_cookies.py 生成；留空则不自动带 cookie",
+  "lark_cli": "（可选）lark-cli 可执行文件路径，飞书附件下载用；留空则回退到 PATH 上的 lark-cli"
 }
